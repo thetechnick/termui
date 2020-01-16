@@ -19,6 +19,7 @@ type List struct {
 	TextStyle        Style
 	SelectedRow      int
 	topRow           int
+	charOffset int // for side-scrolling
 	SelectedRowStyle Style
 }
 
@@ -48,7 +49,7 @@ func (self *List) Draw(buf *Buffer) {
 		if self.WrapText {
 			cells = WrapCells(cells, uint(self.Inner.Dx()))
 		}
-		for j := 0; j < len(cells) && point.Y < self.Inner.Max.Y; j++ {
+		for j := self.charOffset; j < len(cells) && point.Y < self.Inner.Max.Y; j++ {
 			style := cells[j].Style
 			if row == self.SelectedRow {
 				style = self.SelectedRowStyle
@@ -96,6 +97,21 @@ func (self *List) ScrollAmount(amount int) {
 	} else {
 		self.SelectedRow += amount
 	}
+}
+
+func (self *List) ScrollSideAmount(amount int) {
+	self.charOffset += amount
+	if self.charOffset < 0 {
+		self.charOffset = 0
+	}
+}
+
+func (self *List) ScrollRight() {
+	self.ScrollSideAmount(1)
+}
+
+func (self *List) ScrollLeft() {
+	self.ScrollSideAmount(-1)
 }
 
 func (self *List) ScrollUp() {
